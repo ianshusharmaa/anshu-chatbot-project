@@ -1,10 +1,15 @@
+# Streamlit is used to build the web UI and Ollama handles local AI chat
 import streamlit as st
-import ollama
+import ollama  # Make sure Ollama is running locally with the chosen model
 
-# Configure Streamlit page
-st.set_page_config(page_title="ANSHU'S CHAT BOT (PROJECT 2)", page_icon="🤖", layout="centered")
+# ----- PAGE CONFIGURATION -----
+st.set_page_config(
+    page_title="ANSHU'S CHAT BOT (PROJECT 2)", 
+    page_icon="🤖", 
+    layout="centered"
+)
 
-# Custom CSS for styling
+# ----- CUSTOM CSS FOR DARK THEME -----
 st.markdown("""
     <style>
     body {
@@ -33,32 +38,38 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title(" ANSHU'S CHAT BOT (PROJECT 2)")
+# ----- APP TITLE -----
+st.title("🤖 ANSHU'S CHAT BOT (PROJECT 2)")
 
-# Store messages in session state
+# ----- INITIALIZE SESSION STATE FOR CHAT MESSAGES -----
 if "messages" not in st.session_state:
-    st.session_state.messages = []
+    st.session_state.messages = []  # Format: {"role": "user"/"assistant", "content": "text"}
 
-# Show chat history
+# ----- DISPLAY PREVIOUS CHAT MESSAGES -----
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# Chat input
+# ----- USER CHAT INPUT -----
 user_input = st.chat_input("Say something...")
+
 if user_input:
+    # Display user's message in chat and store it
     st.chat_message("user").markdown(user_input)
     st.session_state.messages.append({"role": "user", "content": user_input})
 
+    # Generate response using Ollama
     with st.spinner("Thinking..."):
         try:
+            # Send chat history to Ollama to generate contextual response
             response = ollama.chat(
-                model="llama3",
+                model="llama3",  # Change to any local model like mistral or llama2
                 messages=st.session_state.messages
             )
             reply = response["message"]["content"]
         except Exception as e:
-            reply = f"Error: {e}"
+            reply = f"Error: {e}"  # Handle errors (e.g., if Ollama isn't running)
 
+    # Display and store AI's reply
     st.chat_message("assistant").markdown(reply)
     st.session_state.messages.append({"role": "assistant", "content": reply})
